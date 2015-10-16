@@ -1,6 +1,7 @@
 package de.wnill.heat.rest;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -23,7 +24,7 @@ public class SensorsFacade {
 	}
 	
 	@Path("{id}")
-	@GET
+	@POST
 	@Produces("application/json")
 	public Response addSensor(@PathParam("id") String id) {
 		SensorService.getInstance().addSensor(id);
