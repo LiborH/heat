@@ -26,4 +26,12 @@ public class SensorService {
 		return sensors;
 	}
 
+	public Sensor getById(String id) {
+		for (Sensor sensor : sensors) {
+			if (sensor.getId().equals(id)) {
+				return sensor;
+			}
+		}
+		return null;
+	} 
 }
