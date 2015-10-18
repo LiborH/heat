@@ -17,19 +17,26 @@ public class SensorsFacade {
 
 	@GET
 	@Produces("application/json")
-	public Response showSensors() throws JSONException {
+	public Response showAllSensors() throws JSONException {
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("sensorIds", SensorService.getInstance().getAll());
+		jsonObject.put("sensors", SensorService.getInstance().getAll());
 		return Response.status(200).entity(jsonObject.toString()).build();
 	}
-	
+
+	@Path("{id}")
+	@GET
+	@Produces("application/json")
+	public Response showSensor(@PathParam("id") String id) {
+		JSONObject jsonObject = new JSONObject(SensorService.getInstance().getById(id));
+		return Response.status(200).entity(jsonObject.toString()).build();
+	}
+
 	@Path("{id}")
 	@POST
 	@Produces("application/json")
 	public Response addSensor(@PathParam("id") String id) {
 		SensorService.getInstance().addSensor(id);
-		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("id", id);
+		JSONObject jsonObject = new JSONObject().put("id", id);
 		return Response.status(200).entity(jsonObject.toString()).build();
 
 	}
