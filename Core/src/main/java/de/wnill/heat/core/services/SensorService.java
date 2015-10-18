@@ -3,6 +3,7 @@ package de.wnill.heat.core.services;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.wnill.heat.core.dto.Reading;
 import de.wnill.heat.core.dto.Sensor;
 
 public class SensorService {
@@ -11,6 +12,11 @@ public class SensorService {
 
   private static SensorService instance = null;
 
+  /**
+   * Returns the singleton instance.
+   * 
+   * @return instance
+   */
   public static SensorService getInstance() {
     if (instance == null) {
       instance = new SensorService();
@@ -26,6 +32,11 @@ public class SensorService {
     return sensors;
   }
 
+  /**
+   * Returns a single Sensor for given id.
+   * @param id the id to check
+   * @return a Sensor
+   */
   public Sensor getById(String id) {
     for (Sensor sensor : sensors) {
       if (sensor.getId().equals(id)) {
@@ -33,5 +44,10 @@ public class SensorService {
       }
     }
     return null;
+  }
+
+  public void addReading(String id, Reading reading) {
+    // TODO Auto-generated method stub
+    
   }
 }
