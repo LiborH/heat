@@ -71,8 +71,9 @@ public class SensorsFacade {
   @Consumes("application/json")
   @Produces("application/json")
   public Response addReading(@PathParam("id") String id, Reading reading) {
-    reading.setTime(new Date());
-    SensorService.getInstance().addReading(id, reading);
+    reading.setTimestamp(new Date().toString());
+    reading.setSensorId(id);
+    SensorService.getInstance().addReading(reading);
     return Response.status(201).build();
   }
 

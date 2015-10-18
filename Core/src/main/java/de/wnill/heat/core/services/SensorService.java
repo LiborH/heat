@@ -5,6 +5,7 @@ import java.util.List;
 
 import de.wnill.heat.util.dto.Reading;
 import de.wnill.heat.util.dto.Sensor;
+import de.wnill.heat.util.persistence.PersistenceService;
 
 public class SensorService {
 
@@ -46,8 +47,8 @@ public class SensorService {
     return null;
   }
 
-  public void addReading(String id, Reading reading) {
-    // TODO Auto-generated method stub
+  public void addReading(Reading reading) {
+    PersistenceService.getInstance().store(reading);
     
   }
 }
