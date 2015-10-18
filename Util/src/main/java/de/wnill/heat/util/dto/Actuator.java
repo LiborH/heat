@@ -1,4 +1,4 @@
-package de.wnill.heat.core.dto;
+package de.wnill.heat.util.dto;
 
 public class Actuator {
 

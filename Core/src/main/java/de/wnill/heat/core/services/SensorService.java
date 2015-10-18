@@ -3,8 +3,8 @@ package de.wnill.heat.core.services;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.wnill.heat.core.dto.Reading;
-import de.wnill.heat.core.dto.Sensor;
+import de.wnill.heat.util.dto.Reading;
+import de.wnill.heat.util.dto.Sensor;
 
 public class SensorService {
 

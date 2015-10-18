@@ -13,8 +13,8 @@ import javax.ws.rs.core.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import de.wnill.heat.core.dto.Reading;
 import de.wnill.heat.core.services.SensorService;
+import de.wnill.heat.util.dto.Reading;
 
 @Path("/sensors")
 public class SensorsFacade {
