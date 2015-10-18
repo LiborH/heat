@@ -1,26 +1,41 @@
 package de.wnill.heat.util.dto;
 
-import java.util.Date;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
+@DynamoDBTable(tableName = "ReadingsTest")
 public class Reading {
 
-  private Date time;
-  
+  private String sensorId;
+
+  private String timestamp;
+
   private float temperature;
-  
+
   private float light;
-  
+
   private boolean motion;
-  
-  
+
+
   public Reading() {}
 
-  public Date getTime() {
-    return time;
+  @DynamoDBHashKey
+  public String getSensorId() {
+    return sensorId;
   }
 
-  public void setTime(Date time) {
-    this.time = time;
+  public void setSensorId(String sensorId) {
+    this.sensorId = sensorId;
+  }
+
+  @DynamoDBRangeKey
+  public String getTimestamp() {
+    return timestamp;
+  }
+
+  public void setTimestamp(String timestamp) {
+    this.timestamp = timestamp;
   }
 
   public float getTemperature() {
@@ -49,8 +64,10 @@ public class Reading {
 
   @Override
   public String toString() {
-    return "Reading [temperature=" + temperature + ", light=" + light + ", motion=" + motion + "]";
+    return "Reading [sensorId=" + sensorId + ", timestamp=" + timestamp + ", temperature="
+        + temperature + ", light=" + light + ", motion=" + motion + "]";
   }
+
 
 
 }

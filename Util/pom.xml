@@ -5,15 +5,10 @@
   <version>0.0.1-SNAPSHOT</version>
   
   <dependencies>
-    <dependency>
-        <groupId>org.mongodb</groupId>
-        <artifactId>mongo-java-driver</artifactId>
-        <version>2.13.3</version>
-    </dependency>
-        <dependency>
-        <groupId>org.mongodb</groupId>
-        <artifactId>bson</artifactId>
-        <version>2.13.3</version>
+  <dependency>
+        <groupId>com.amazonaws</groupId>
+        <artifactId>aws-java-sdk-dynamodb</artifactId>
+        <version>1.10.27</version>
     </dependency>
 </dependencies>
 </project>
