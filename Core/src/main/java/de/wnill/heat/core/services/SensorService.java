@@ -25,7 +25,22 @@ public class SensorService {
     return instance;
   }
 
-  public void addSensor(String id) {
+  /**
+   * Registers a sensor if not already existing yet.
+   * @param id the sensor's id
+   */
+  public void registerSensor(String id) {
+    
+    for (Sensor sensor : sensors) {
+      if (sensor.getId().equals(id)) {
+        return;
+      }
+    }
+    
+    Sensor existing = PersistenceService.getInstance().loadSensor(id);
+    if (existing == null) {
+      PersistenceService.getInstance().store(new Sensor(id));
+    }
     sensors.add(new Sensor(id));
   }
 
@@ -44,11 +59,13 @@ public class SensorService {
         return sensor;
       }
     }
-    return null;
+    
+    // If not cached, check if it exists in DB
+    Sensor sensor = PersistenceService.getInstance().loadSensor(id);
+    return sensor;
   }
 
   public void addReading(Reading reading) {
     PersistenceService.getInstance().store(reading);
-    
   }
 }

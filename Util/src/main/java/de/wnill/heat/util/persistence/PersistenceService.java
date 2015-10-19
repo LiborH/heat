@@ -2,6 +2,7 @@ package de.wnill.heat.util.persistence;
 
 import java.util.List;
 
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.RegionUtils;
@@ -11,6 +12,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 
 import de.wnill.heat.util.dto.Reading;
+import de.wnill.heat.util.dto.Sensor;
 
 public class PersistenceService {
 
@@ -26,7 +28,7 @@ public class PersistenceService {
   }
 
   /**
-   * Access for the singleton.
+   * Singleton access.
    * 
    * @return instance
    */
@@ -39,14 +41,47 @@ public class PersistenceService {
     return instance;
   }
 
-  public boolean store(Reading data) {
-    mapper.save(data);
+  /**
+   * Persists given object.
+   * 
+   * @param data the object to persist
+   * @return false if something went wrong
+   */
+  public boolean store(Object data) {
+    try {
+      mapper.save(data);
+    } catch (AmazonClientException e) {
+      return false;
+    }
     return true;
   }
 
+  /**
+   * Loads a persisted reading.
+   * 
+   * @param id the reading id
+   * @param timestamp of the reading
+   * @return the reading
+   */
   public Reading loadReading(String id, String timestamp) {
-    return mapper.load(Reading.class, id, timestamp);
+    try {
+      return mapper.load(Reading.class, id, timestamp);
+    } catch (AmazonClientException e) {
+      return null;
+    }
   }
-  
-  
+
+  /**
+   * Loads a persisted sensor.
+   * 
+   * @param id the sensor id
+   * @return the sensor
+   */
+  public Sensor loadSensor(String id) {
+    try {
+      return mapper.load(Sensor.class, id);
+    } catch (AmazonClientException e) {
+      return null;
+    }
+  }
 }
