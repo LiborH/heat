@@ -84,4 +84,18 @@ public class PersistenceService {
       return null;
     }
   }
+
+  /**
+   * Generic method to load persisted entities.
+   * @param id which has to be a String
+   * @param type the class of object to load
+   * @return the loaded object
+   */
+  public <T> T loadEntity(String id, Class<T> type) {
+    try {
+      return mapper.load(type, id);
+    } catch (AmazonClientException e) {
+      return null;
+    }
+  }
 }

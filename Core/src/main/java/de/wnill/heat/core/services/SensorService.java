@@ -37,7 +37,7 @@ public class SensorService {
       }
     }
     
-    Sensor existing = PersistenceService.getInstance().loadSensor(id);
+    Sensor existing = PersistenceService.getInstance().loadEntity(id, Sensor.class);
     if (existing == null) {
       PersistenceService.getInstance().store(new Sensor(id));
     }
@@ -61,7 +61,7 @@ public class SensorService {
     }
     
     // If not cached, check if it exists in DB
-    Sensor sensor = PersistenceService.getInstance().loadSensor(id);
+    Sensor sensor = PersistenceService.getInstance().loadEntity(id, Sensor.class);
     return sensor;
   }
 
