@@ -11,6 +11,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedScanList;
 
+import de.wnill.heat.util.dto.Actuator;
 import de.wnill.heat.util.dto.Reading;
 import de.wnill.heat.util.dto.Sensor;
 import de.wnill.heat.util.dto.Zone;
@@ -73,7 +74,7 @@ public class PersistenceService {
   }
 
   /**
-   * Loads a persisted sensor.
+   * Loads a specific, persisted sensor.
    * 
    * @param id the sensor id
    * @return the sensor
@@ -84,6 +85,26 @@ public class PersistenceService {
     } catch (AmazonClientException e) {
       return null;
     }
+  }
+
+  /**
+   * Retrieves all stored sensors.
+   * 
+   * @return a list of Sensors
+   */
+  public ArrayList<Sensor> loadSensors() {
+    PaginatedScanList<Sensor> result = mapper.scan(Sensor.class, new DynamoDBScanExpression());
+    return new ArrayList<Sensor>(result);
+  }
+
+  /**
+   * Retrieves all stored actuators.
+   * 
+   * @return a list of Actuators
+   */
+  public ArrayList<Actuator> loadActuators() {
+    PaginatedScanList<Actuator> result = mapper.scan(Actuator.class, new DynamoDBScanExpression());
+    return new ArrayList<Actuator>(result);
   }
 
   /**

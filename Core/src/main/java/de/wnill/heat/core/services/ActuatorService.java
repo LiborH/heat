@@ -20,8 +20,17 @@ public class ActuatorService {
   public static ActuatorService getInstance() {
     if (instance == null) {
       instance = new ActuatorService();
+      instance.reload();
     }
     return instance;
+  }
+
+
+  /**
+   * Overwrites currently loaded actuators with those from store.
+   */
+  public void reload() {
+    actuators = PersistenceService.getInstance().loadActuators();
   }
 
   /**
@@ -62,10 +71,7 @@ public class ActuatorService {
         return actuator;
       }
     }
-
-    // If not cached, check if it exists in DB
-    Actuator actuator = PersistenceService.getInstance().loadEntity(id, Actuator.class);
-    return actuator;
+    return null;
   }
 
 }

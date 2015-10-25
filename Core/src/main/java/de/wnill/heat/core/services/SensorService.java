@@ -21,8 +21,16 @@ public class SensorService {
   public static SensorService getInstance() {
     if (instance == null) {
       instance = new SensorService();
+      instance.reload();
     }
     return instance;
+  }
+
+  /**
+   * Overwrites currently loaded sensors with those from store.
+   */
+  public void reload() {
+    sensors = PersistenceService.getInstance().loadSensors();
   }
 
   /**
@@ -62,10 +70,7 @@ public class SensorService {
         return sensor;
       }
     }
-
-    // If not cached, check if it exists in DB
-    Sensor sensor = PersistenceService.getInstance().loadEntity(id, Sensor.class);
-    return sensor;
+    return null;
   }
 
   /**

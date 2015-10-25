@@ -15,9 +15,10 @@ import de.wnill.heat.core.services.ActuatorService;
 public class ActuatorsFacade {
 
   /**
-   * Returns the state of a Sensor specified by an Id.
-   * @param id to lookup a Sensor
-   * @return Sensor
+   * Returns the state of an Actuator specified by an Id.
+   * 
+   * @param id to lookup an Actuator
+   * @return Actuator instance
    */
   @Path("{id}")
   @GET
@@ -28,7 +29,21 @@ public class ActuatorsFacade {
   }
 
   /**
-   * Registers a Sensor with given Id. 
+   * Returns an array of all actuators.
+   * 
+   * @return Actuator array
+   */
+  @GET
+  @Produces("application/json")
+  public Response showAllActuators() {
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("actuators", ActuatorService.getInstance().getAll());
+    return Response.status(200).entity(jsonObject.toString()).build();
+  }
+
+  /**
+   * Registers a Sensor with given Id.
+   * 
    * @param id the sensor id.
    * @return 201 if everything went fine
    */
