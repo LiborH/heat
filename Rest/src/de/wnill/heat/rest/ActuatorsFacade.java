@@ -36,7 +36,11 @@ public class ActuatorsFacade {
   @PUT
   @Produces("application/json")
   public Response registerActuator(@PathParam("id") String id) {
-    ActuatorService.getInstance().registerActuator(id);
-    return Response.status(201).build();
+    boolean success = ActuatorService.getInstance().registerActuator(id);
+    if (success) {
+      return Response.status(201).build();
+    } else {
+      return Response.status(500).build();
+    }
   }
 }

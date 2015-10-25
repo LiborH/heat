@@ -26,21 +26,24 @@ public class ActuatorService {
 
   /**
    * Registers an actuator if not already existing yet.
+   * 
    * @param id the actuator's id
+   * @return false if errors occur
    */
-  public void registerActuator(String id) {
-    
+  public boolean registerActuator(String id) {
+
     for (Actuator actuator : actuators) {
       if (actuator.getId().equals(id)) {
-        return;
+        return true;
       }
     }
-    
-    Actuator existing = PersistenceService.getInstance().loadEntity(id, Actuator.class);
-    if (existing == null) {
-      PersistenceService.getInstance().store(new Actuator(id));
+
+    boolean success = PersistenceService.getInstance().store(new Actuator(id));
+
+    if (success) {
+      actuators.add(new Actuator(id));
     }
-    actuators.add(new Actuator(id));
+    return success;
   }
 
   public List<Actuator> getAll() {
@@ -49,6 +52,7 @@ public class ActuatorService {
 
   /**
    * Returns a single Actuator for given id.
+   * 
    * @param id the id to check
    * @return an Actuator
    */
@@ -58,7 +62,7 @@ public class ActuatorService {
         return actuator;
       }
     }
-    
+
     // If not cached, check if it exists in DB
     Actuator actuator = PersistenceService.getInstance().loadEntity(id, Actuator.class);
     return actuator;

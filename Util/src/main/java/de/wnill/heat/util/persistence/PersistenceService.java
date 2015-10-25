@@ -1,18 +1,19 @@
 package de.wnill.heat.util.persistence;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Region;
-import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedScanList;
 
 import de.wnill.heat.util.dto.Reading;
 import de.wnill.heat.util.dto.Sensor;
+import de.wnill.heat.util.dto.Zone;
 
 public class PersistenceService {
 
@@ -87,6 +88,7 @@ public class PersistenceService {
 
   /**
    * Generic method to load persisted entities.
+   * 
    * @param id which has to be a String
    * @param type the class of object to load
    * @return the loaded object
@@ -97,5 +99,15 @@ public class PersistenceService {
     } catch (AmazonClientException e) {
       return null;
     }
+  }
+
+  /**
+   * Retrieves all stored zones.
+   * 
+   * @return a list of Zones
+   */
+  public ArrayList<Zone> loadZones() {
+    PaginatedScanList<Zone> result = mapper.scan(Zone.class, new DynamoDBScanExpression());
+    return new ArrayList<Zone>(result);
   }
 }

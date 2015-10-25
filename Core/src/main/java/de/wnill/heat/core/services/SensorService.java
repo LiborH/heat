@@ -27,21 +27,23 @@ public class SensorService {
 
   /**
    * Registers a sensor if not already existing yet.
+   * 
    * @param id the sensor's id
+   * @return false if errors occur
    */
-  public void registerSensor(String id) {
-    
+  public boolean registerSensor(String id) {
+
     for (Sensor sensor : sensors) {
       if (sensor.getId().equals(id)) {
-        return;
+        return true;
       }
     }
-    
-    Sensor existing = PersistenceService.getInstance().loadEntity(id, Sensor.class);
-    if (existing == null) {
-      PersistenceService.getInstance().store(new Sensor(id));
+
+    boolean success = PersistenceService.getInstance().store(new Sensor(id));
+    if (success) {
+      sensors.add(new Sensor(id));
     }
-    sensors.add(new Sensor(id));
+    return success;
   }
 
   public List<Sensor> getAll() {
@@ -50,6 +52,7 @@ public class SensorService {
 
   /**
    * Returns a single Sensor for given id.
+   * 
    * @param id the id to check
    * @return a Sensor
    */
@@ -59,13 +62,19 @@ public class SensorService {
         return sensor;
       }
     }
-    
+
     // If not cached, check if it exists in DB
     Sensor sensor = PersistenceService.getInstance().loadEntity(id, Sensor.class);
     return sensor;
   }
 
-  public void addReading(Reading reading) {
-    PersistenceService.getInstance().store(reading);
+  /**
+   * Records a sensor reading.
+   * 
+   * @param reading the reading
+   * @return false if errors occur
+   */
+  public boolean addReading(Reading reading) {
+    return PersistenceService.getInstance().store(reading);
   }
 }
