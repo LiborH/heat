@@ -1,10 +1,24 @@
+#include <MySensor.h>
+#include <SPI.h>
 
 // ****** Config - adapt if necessary
+
+#define SID 1
+#define NID 2
+
+const char* SKETCH = "HeatActuator";
+const char* VERSION = "2015-11-30";
 
 // Pins
 const int IA_PIN = 5;
 const int IB_PIN = 6;
 const int READ_PIN = A0;
+
+// Give the wireless some time to fetch messages
+const unsigned long WAIT_FOR_MESSAGE_TIMEOUT = 1000;
+
+// After this interval arduino will wake up and check if messages for this actuator have arrived
+const unsigned long SLEEP_INTERVAL = 1000; 
 
 // How many samples are read to calculate the (average) current.
 const int SAMPLES = 5;
@@ -33,6 +47,8 @@ const int SLEEP_BETWEEN_STALL_CHECK = 200;
 int position = 0;
 unsigned long timeToClose = 0;
 unsigned long timeToOpen = 0;
+MySensor gw;
+MyMessage msg(SID, V_TEMP);
 int rawValue= 0;
 double voltage = 0;
 double amps = 0;
@@ -46,16 +62,25 @@ char command;
 void setup() 
 { 
  Serial.begin(9600);
+
+  gw.begin(incomingMessage, NID, false);
+  gw.present(SID, S_HEATER);
+  gw.sendSketchInfo(SKETCH, VERSION, false);
+ 
   pinMode(IA_PIN, OUTPUT);
   pinMode(IB_PIN, OUTPUT);
   lastCheck = millis();
 
-  // First, normalize the current reading to 0
+  // First, normalize the current reading to 0 and then calibrate
   normalize = readCurrent();
+
+  calibrate();
 }
  
 void loop()
-{ 
+{
+
+  // Execute any jobs that comes via serial first
   if (Serial.available()) {
     direction = "";
     command = Serial.read();
@@ -81,7 +106,22 @@ void loop()
    if (millis() - lastCheck > LOG_INTERVAL) {
      Serial.println(current, 2);
      lastCheck = millis();
-   }   
+   } 
+
+
+  // Check for any pending jobs, execute them and go to sleep
+  gw.request(SID, V_VAR1);
+  gw.wait(WAIT_FOR_MESSAGE_TIMEOUT);
+  gw.sleep(SLEEP_INTERVAL);  
+}
+
+void incomingMessage(const MyMessage &message) {
+  if (message.type==V_VAR1) {
+    int newPosition = message.getInt();
+    Serial.print("Moving to position: ");
+    Serial.println(newPosition);
+    moveToPosition(newPosition);
+  }
 }
 
 void calibrate() {
