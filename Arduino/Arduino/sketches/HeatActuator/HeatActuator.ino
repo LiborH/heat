@@ -28,6 +28,11 @@ const byte speed = 255;
 const int SLEEP_BETWEEN_STALL_CHECK = 200;
 
 // ******* Variable initialization
+
+// Models the state of the actuator. 100 = valve completely open, 0 = completely closed.
+int position = 0;
+unsigned long timeToClose = 0;
+unsigned long timeToOpen = 0;
 int rawValue= 0;
 double voltage = 0;
 double amps = 0;
@@ -82,8 +87,8 @@ void loop()
 void calibrate() {
   unsigned long start = 0;
   unsigned long stop = 0;
-  unsigned long avgOpening = 0;
-  unsigned long avgClosing = 0;
+  timeToOpen = 0;
+  timeToClose = 0;
   double current = .0;
     
   // start with a completely open valve
@@ -107,7 +112,7 @@ void calibrate() {
     waitUntilStall();
     stop = millis();
     Serial.println("Valve closed. Opening");
-    avgClosing += (stop - start);
+    timeToClose += (stop - start);
 
     // Cool down
     delay(1000);
@@ -118,21 +123,25 @@ void calibrate() {
     waitUntilStall();
     stop = millis();
     Serial.println("Valve open");
-    avgOpening += (stop - start);
+    timeToOpen += (stop - start);
 
     // Cool down
-    delay(1000);
-        
+    delay(1000);        
   }
 
-  avgClosing = avgClosing / CALIBRATION_RUNS;
-  avgOpening = avgOpening / CALIBRATION_RUNS;
+  timeToClose = timeToClose / CALIBRATION_RUNS;
+  timeToOpen = timeToOpen / CALIBRATION_RUNS;
 
   Serial.print("Average Closing in ms: ");
-  Serial.println(avgClosing);
+  Serial.println(timeToClose);
 
   Serial.print("Average Opening in ms: ");
-  Serial.println(avgOpening);
+  Serial.println(timeToOpen);
+
+  // Leave the valve closed
+  closeValve();
+  waitUntilStall();
+  position = 0;
 }
 
 void waitUntilStall() {
@@ -143,6 +152,23 @@ void waitUntilStall() {
     delay(SLEEP_BETWEEN_STALL_CHECK);
   }
 }
+
+
+void moveToPosition(int newPos) {
+  if (newPos > position) {
+    unsigned long timeToPosition = (newPos - position) / (float)100 * timeToOpen;
+    openValve();
+    delay(timeToPosition);
+    stop();
+  } else if (newPos < position) {
+    unsigned long timeToPosition = (position - newPos) / (float)100 * timeToClose;
+    closeValve();
+    delay(timeToPosition);
+    stop();
+  }
+  position = newPos;
+}
+
 
 // Returns current in Amps
 double readCurrent() {
