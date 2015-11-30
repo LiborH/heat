@@ -1,30 +1,40 @@
 
-// *** Config here
+// ****** Config - adapt if necessary
+
+// Pins
 const int IA_PIN = 5;
 const int IB_PIN = 6;
 const int READ_PIN = A0;
-// How many samples are read to calculate the (average) current
+
+// How many samples are read to calculate the (average) current.
 const int SAMPLES = 5;
-// in ms
+
+// in ms. Taking samples more frequently results in higher error rate.
 const int SLEEP_BETWEEN_SAMPLES = 100;
+
+// current threshold (in A) above which the motor is considered as stalled
 const double STALL_THRESHOLD = 0.03;
 
-unsigned long interval = 500;
+// Interval between output of current
+const unsigned long LOG_INTERVAL = 500;
 
-// *** Variables
-int mVperAmp = 185;
+// How often should the valve be closed and opened during calibration
+const int CALIBRATION_RUNS = 3;
+
+// ******* Constants - do not touch
+const int mVperAmp = 185;
+const int acsOffset = 2500; 
+const byte speed = 255;
+const int SLEEP_BETWEEN_STALL_CHECK = 200;
+
+// ******* Variable initialization
 int rawValue= 0;
-int acsOffset = 2500; 
 double voltage = 0;
 double amps = 0;
-float sample[SAMPLES];
 double avgAmp = 0;
 // deviation from 0V measured when motor is idle
 double normalize = .0;
-
-byte speed = 255;
 unsigned long lastCheck;
-
 String direction = "";
 char command;
  
@@ -55,8 +65,6 @@ void loop()
     } else if (direction == "i") {
       calibrate();
     }
-
-
   }
 
    double current = readCurrent();
@@ -65,15 +73,13 @@ void loop()
     stop();
    }
 
-   if (millis() - lastCheck > interval) {
+   if (millis() - lastCheck > LOG_INTERVAL) {
      Serial.println(current, 2);
      lastCheck = millis();
    }   
 }
 
 void calibrate() {
-
-
   unsigned long start = 0;
   unsigned long stop = 0;
   unsigned long avgOpening = 0;
@@ -85,25 +91,20 @@ void calibrate() {
   while(current <= STALL_THRESHOLD) {
     current = readCurrent();
     Serial.println(current);
-    delay(200);
+    delay(SLEEP_BETWEEN_STALL_CHECK);
   }
 
   // cooldown
   delay(1000);
   
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < CALIBRATION_RUNS; i++) {
     
     Serial.println("Start calibration run");
-    double current = .0;
     
-    // Start measuring the time!
+    // Measure time to close the valve
     start = millis();
     closeValve();
-    while(current <= STALL_THRESHOLD) {
-      current = readCurrent();
-      Serial.println(current);
-      delay(200);
-    }
+    waitUntilStall();
     stop = millis();
     Serial.println("Valve closed. Opening");
     avgClosing += (stop - start);
@@ -111,15 +112,10 @@ void calibrate() {
     // Cool down
     delay(1000);
 
-    current = .0;
-
+    // Measure time to open the valve
     start = millis();
     openValve();
-    while(current <= STALL_THRESHOLD) {
-      current = readCurrent();
-      Serial.println(current);
-      delay(200);
-    }
+    waitUntilStall();
     stop = millis();
     Serial.println("Valve open");
     avgOpening += (stop - start);
@@ -129,18 +125,24 @@ void calibrate() {
         
   }
 
-  avgClosing = avgClosing / 3;
-  avgOpening = avgOpening / 3;
+  avgClosing = avgClosing / CALIBRATION_RUNS;
+  avgOpening = avgOpening / CALIBRATION_RUNS;
 
   Serial.print("Average Closing in ms: ");
   Serial.println(avgClosing);
 
-    Serial.print("Average Opening in ms: ");
+  Serial.print("Average Opening in ms: ");
   Serial.println(avgOpening);
-
 }
 
-
+void waitUntilStall() {
+  double current = .0;
+    while(current <= STALL_THRESHOLD) {
+    current = readCurrent();
+    Serial.println(current);
+    delay(SLEEP_BETWEEN_STALL_CHECK);
+  }
+}
 
 // Returns current in Amps
 double readCurrent() {
