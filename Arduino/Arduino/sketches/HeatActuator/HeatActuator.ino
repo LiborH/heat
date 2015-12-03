@@ -24,7 +24,7 @@ const unsigned long SLEEP_INTERVAL = 1000;
 const int SAMPLES = 5;
 
 // in ms. Taking samples more frequently results in higher error rate.
-const int SLEEP_BETWEEN_SAMPLES = 100;
+const int SLEEP_BETWEEN_SAMPLES = 200;
 
 // current threshold (in A) above which the motor is considered as stalled
 const double STALL_THRESHOLD = 0.03;
@@ -63,18 +63,18 @@ void setup()
 { 
  Serial.begin(9600);
 
-  gw.begin(incomingMessage, NID, false);
-  gw.present(SID, S_HEATER);
-  gw.sendSketchInfo(SKETCH, VERSION, false);
+ Serial.println("initializing");
+  //gw.begin(incomingMessage, NID, false);
+  //gw.present(SID, S_HEATER);
+  //gw.sendSketchInfo(SKETCH, VERSION, false);
  
   pinMode(IA_PIN, OUTPUT);
   pinMode(IB_PIN, OUTPUT);
   lastCheck = millis();
 
   // First, normalize the current reading to 0 and then calibrate
-  normalize = readCurrent();
+  normalize = getNormal();
 
-  calibrate();
 }
  
 void loop()
@@ -83,8 +83,9 @@ void loop()
   // Execute any jobs that comes via serial first
   if (Serial.available()) {
     direction = "";
-    command = Serial.read();
-    direction.concat(command);
+    //command = Serial.read();
+    //direction.concat(command);
+    direction = Serial.readStringUntil('\n');
 
     if (direction == "c") {
       closeValve();
@@ -94,6 +95,10 @@ void loop()
       openValve();
     } else if (direction == "i") {
       calibrate();
+    } else if (direction == "n") {
+      normalize = getNormal();
+    } else {
+      moveToPosition(direction.toInt());
     }
   }
 
@@ -110,9 +115,9 @@ void loop()
 
 
   // Check for any pending jobs, execute them and go to sleep
-  gw.request(SID, V_VAR1);
-  gw.wait(WAIT_FOR_MESSAGE_TIMEOUT);
-  gw.sleep(SLEEP_INTERVAL);  
+  //gw.request(SID, V_VAR1);
+  //gw.wait(WAIT_FOR_MESSAGE_TIMEOUT);
+  //gw.sleep(SLEEP_INTERVAL);  
 }
 
 void incomingMessage(const MyMessage &message) {
@@ -195,18 +200,44 @@ void waitUntilStall() {
 
 
 void moveToPosition(int newPos) {
+
+  Serial.print("Desired position:");
+  Serial.println(newPos);
+
+  if (timeToOpen == 0 || timeToClose == 0) {
+    Serial.println("Starting calibration first");
+    calibrate();
+  }
+
+  Serial.print("Delta:");
+  Serial.println(newPos - position);
+
+  Serial.print("Movement duration");
+  
+  
   if (newPos > position) {
     unsigned long timeToPosition = (newPos - position) / (float)100 * timeToOpen;
+    Serial.println(timeToPosition);
     openValve();
     delay(timeToPosition);
     stop();
   } else if (newPos < position) {
     unsigned long timeToPosition = (position - newPos) / (float)100 * timeToClose;
+    Serial.println(timeToPosition);
     closeValve();
     delay(timeToPosition);
     stop();
   }
   position = newPos;
+}
+
+double getNormal() {
+  double normSamples = readCurrent();
+  delay(500);
+  normSamples += readCurrent(); 
+  delay(500);
+  normSamples += readCurrent();
+  return normSamples / 3; 
 }
 
 
