@@ -58,15 +58,16 @@ double normalize = .0;
 unsigned long lastCheck;
 String direction = "";
 char command;
+
  
 void setup() 
 { 
- Serial.begin(9600);
-
- Serial.println("initializing");
-  //gw.begin(incomingMessage, NID, false);
-  //gw.present(SID, S_HEATER);
-  //gw.sendSketchInfo(SKETCH, VERSION, false);
+  Serial.begin(115200);
+  Serial.println("initializing");
+  
+  gw.begin(incomingMessage, NID, false);
+  gw.present(SID, S_HEATER);
+  gw.sendSketchInfo(SKETCH, VERSION, false);
  
   pinMode(IA_PIN, OUTPUT);
   pinMode(IB_PIN, OUTPUT);
@@ -79,7 +80,6 @@ void setup()
  
 void loop()
 {
-
   // Execute any jobs that comes via serial first
   if (Serial.available()) {
     direction = "";
@@ -115,9 +115,9 @@ void loop()
 
 
   // Check for any pending jobs, execute them and go to sleep
-  //gw.request(SID, V_VAR1);
-  //gw.wait(WAIT_FOR_MESSAGE_TIMEOUT);
-  //gw.sleep(SLEEP_INTERVAL);  
+  gw.request(SID, V_VAR1);
+  gw.wait(WAIT_FOR_MESSAGE_TIMEOUT);
+  gw.sleep(SLEEP_INTERVAL);  
 }
 
 void incomingMessage(const MyMessage &message) {

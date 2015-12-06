@@ -112,7 +112,7 @@ void loop()
     Serial.println(avgTemp);
     if (avgTemp != lastTemperature) {
       // Send in the new temperature
-      Serial.print("Sendind Update to Controller");
+      Serial.println("Sending Update to Controller");
       gw.send(msg.setSensor(0).set(avgTemp,1));
       // Save new temperatures for next compare
       lastTemperature=avgTemp;

@@ -114,7 +114,7 @@ uint8_t remote_ip[] =  { 192, 168, 2, 103 };  // Mosquitto broker
 //replace with the port that your server is listening on
 #define remote_port 1883
 //replace with arduinos ip-address. Comment out if Ethernet-startup should use dhcp. Is ignored on Yun
-//uint8_t local_ip[] = {192, 168, 2, 111};
+uint8_t local_ip[] = {192, 168, 2, 111};
 //replace with ethernet shield mac. It's mandatory every device is assigned a unique mac. Is ignored on Yun
 uint8_t mac[] = { 0xA2, 0xAE, 0xAD, 0xA0, 0xA0, 0xA2 };
 
@@ -202,6 +202,9 @@ void setup()
  */
 void loop()
 {
+
+  bool subscribed = 0;
+  
   if (!client.connected())
   {
     boolean ret;
@@ -217,7 +220,9 @@ void loop()
     } else {
       Serial.println("Connection to MQTT broker failed");
     }
-    client.subscribe(mqttTopicMask);
+    subscribed = client.subscribe(mqttTopicMask);
+    Serial.print("Subscribed: ");
+    Serial.println(subscribed);
   }
   client.loop();
   gw.process();
@@ -230,6 +235,8 @@ void loop()
  */
 void processRadioMessage(const MyMessage &message)
 { 
+    Serial.println("Received radio message");
+    
     rxBlink(1);
     sendMQTT(message);
 }
@@ -246,9 +253,9 @@ void sendMQTT(const MyMessage &inMsg)
     return;     //We have no connections - return
   if (msg.isAck())
   {
-#ifdef DEBUG
+//#ifdef DEBUG
     Serial.println("msg is ack!");
-#endif
+//#endif
     if (msg.sender == 255 && mGetCommand(msg) == C_INTERNAL
         && msg.type == I_ID_REQUEST)
     {
@@ -307,12 +314,12 @@ void sendMQTT(const MyMessage &inMsg)
         buffsize += strlen_P(mqtt_prefix);
         buffsize += sprintf(&buffer[buffsize], "/%i/255/BATTERY_LEVEL", msg.sender );
         msg.getString(convBuf);
-#ifdef DEBUG
+//#ifdef DEBUG
         Serial.print("publish: ");
         Serial.print((char*) buffer);
         Serial.print(" ");
         Serial.println((char*) convBuf);
-#endif
+//#endif
         client.publish(buffer, convBuf);
       }
       else if (msg.type == I_SKETCH_NAME)
@@ -321,12 +328,12 @@ void sendMQTT(const MyMessage &inMsg)
         buffsize += strlen_P(mqtt_prefix);
         buffsize += sprintf(&buffer[buffsize], "/%i/255/SKETCH_NAME", msg.sender );
         msg.getString(convBuf);
-#ifdef DEBUG
+//#ifdef DEBUG
         Serial.print("publish: ");
         Serial.print((char*) buffer);
         Serial.print(" ");
         Serial.println((char*) convBuf);
-#endif
+//#endif
         client.publish(buffer, convBuf);
       }
       else if (msg.type == I_SKETCH_VERSION)
@@ -335,12 +342,12 @@ void sendMQTT(const MyMessage &inMsg)
         buffsize += strlen_P(mqtt_prefix);
         buffsize += sprintf(&buffer[buffsize], "/%i/255/SKETCH_VERSION", msg.sender );
         msg.getString(convBuf);
-#ifdef DEBUG
+//#ifdef DEBUG
         Serial.print("publish: ");
         Serial.print((char*) buffer);
         Serial.print(" ");
         Serial.println((char*) convBuf);
-#endif
+//#endif
         client.publish(buffer, convBuf);
       }
 
@@ -357,12 +364,12 @@ void sendMQTT(const MyMessage &inMsg)
       buffsize += sprintf(&buffer[buffsize], "/%i/%i/V_%s", msg.sender,
                           msg.sensor, getType(convBuf, &VAR_Type[msg.type]));
       msg.getString(convBuf);
-#ifdef DEBUG
+//#ifdef DEBUG
       Serial.print("publish: ");
       Serial.print((char*) buffer);
       Serial.print(" ");
       Serial.println((char*) convBuf);
-#endif
+//#endif
       client.publish(buffer, convBuf);
     }
   }
@@ -446,6 +453,8 @@ void processMQTTMessage(char* topic, byte* payload,
   buffsize = 0;
   int8_t cmd = -1;
 
+  Serial.println("Received MQTT message");
+
   for (str = strtok_r(topic, "/", &p); str && i < 5;
        str = strtok_r(NULL, "/", &p))
   {
@@ -502,10 +511,10 @@ void processMQTTMessage(char* topic, byte* payload,
               cmd = C_REQ;
             } 
             else {
-#ifdef DEBUG
+//#ifdef DEBUG
               Serial.print("Received unsupported command - ignore: ");
               Serial.println(str);
-#endif              
+//#endif              
             }
           } 
     }
