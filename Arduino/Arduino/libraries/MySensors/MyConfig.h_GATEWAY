@@ -24,8 +24,7 @@
 
 // Enable debug flag for debug prints. This will add a lot to the size of the final sketch but good
 // to see what is actually is happening when developing
-
-#define DEBUG
+//#define DEBUG
 
 // Disable this line, If you are using TX(1), RX(0) as normal I/O pin
 #define ENABLED_SERIAL
@@ -110,8 +109,8 @@
 /**********************************
 *  NRF24L01 Driver Defaults
 ***********************************/
-#define RF24_CE_PIN		   9
-#define RF24_CS_PIN		   10
+#define RF24_CE_PIN		   5
+#define RF24_CS_PIN		   6
 #define RF24_PA_LEVEL 	   RF24_PA_MAX
 #define RF24_PA_LEVEL_GW   RF24_PA_LOW
 // RF channel for the sensor net, 0-127
@@ -122,7 +121,7 @@
 #define RF24_BASE_RADIO_ID ((uint64_t)0xA8A8E1FC00LL)
 
 // Enable SOFTSPI for NRF24L01 when using the W5100 Ethernet module
-//#define SOFTSPI
+#define SOFTSPI
 #ifdef SOFTSPI
 	// Define the soft SPI pins used for NRF radio
 	const uint8_t SOFT_SPI_MISO_PIN = 16;

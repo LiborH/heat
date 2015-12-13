@@ -1,3 +1,10 @@
+#include <DigitalIO.h>
+#include <DigitalPin.h>
+#include <I2cConstants.h>
+#include <PinIO.h>
+#include <SoftI2cMaster.h>
+#include <SoftSPI.h>
+
 #include <MySensor.h>
 #include <SPI.h>
 
@@ -18,7 +25,7 @@ const int READ_PIN = A0;
 const unsigned long WAIT_FOR_MESSAGE_TIMEOUT = 1000;
 
 // After this interval arduino will wake up and check if messages for this actuator have arrived
-const unsigned long SLEEP_INTERVAL = 1000; 
+const unsigned long SLEEP_INTERVAL = 5000; 
 
 // How many samples are read to calculate the (average) current.
 const int SAMPLES = 5;
@@ -48,7 +55,7 @@ int position = 0;
 unsigned long timeToClose = 0;
 unsigned long timeToOpen = 0;
 MySensor gw;
-MyMessage msg(SID, V_TEMP);
+MyMessage msg(SID, V_PERCENTAGE);
 int rawValue= 0;
 double voltage = 0;
 double amps = 0;
@@ -64,10 +71,15 @@ void setup()
 { 
   Serial.begin(115200);
   Serial.println("initializing");
+
+  // Need to rest until Serial is initialized
+  delay(1000);
   
   gw.begin(incomingMessage, NID, false);
   gw.present(SID, S_HEATER);
   gw.sendSketchInfo(SKETCH, VERSION, false);
+
+  delay(1000);
  
   pinMode(IA_PIN, OUTPUT);
   pinMode(IB_PIN, OUTPUT);
@@ -83,8 +95,6 @@ void loop()
   // Execute any jobs that comes via serial first
   if (Serial.available()) {
     direction = "";
-    //command = Serial.read();
-    //direction.concat(command);
     direction = Serial.readStringUntil('\n');
 
     if (direction == "c") {
@@ -115,12 +125,13 @@ void loop()
 
 
   // Check for any pending jobs, execute them and go to sleep
-  gw.request(SID, V_VAR1);
+  gw.send(msg.setDestination(0).set(position));
   gw.wait(WAIT_FOR_MESSAGE_TIMEOUT);
   gw.sleep(SLEEP_INTERVAL);  
 }
 
 void incomingMessage(const MyMessage &message) {
+  Serial.println("Received message");
   if (message.type==V_VAR1) {
     int newPosition = message.getInt();
     Serial.print("Moving to position: ");
@@ -187,6 +198,8 @@ void calibrate() {
   closeValve();
   waitUntilStall();
   position = 0;
+
+  delay(1000);
 }
 
 void waitUntilStall() {
